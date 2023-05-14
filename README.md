@@ -5,3 +5,5 @@ The outputs are:
 A time series with the time-varying rate of events
 An estimate of the number of shocks
 Identification of the significant shocks, where the rate changes more than 20% in less than one month.
+
+The repository contains a set of events in which the picewise linear functions can be tested and the number of shocks observed.
