@@ -1,7 +1,29 @@
-setwd("C:/Rafael/BH/Piecewise")
-install.packages("reshape")
-require("plyr")
-require("dplyr")
+######################################################################
+###### Picewise linear events
+######################################################################
+####
+#### code to analyse a discrete count of events and construct
+#### a picewise linear function that represents the best estimate for 
+#### the daily rate of events. The technique may be applied for events
+#### that are low in frequency and sparse and concentrated in time.
+####
+#### One of that types of events are terrorism attacks.
+####
+#### Here, data from ACLED is used as an example to analyse the daily
+#### rate of Boko Haram events.
+####
+#### Raleigh, Clionadh, et al. "Introducing ACLED: An armed conflict
+#### location and event dataset." Journal of peace research 47.5 
+#### (2010): 651-660.
+#### 
+#### More data available here: https://acleddata.com/
+
+######################################################################
+###### load packages
+######################################################################
+{
+require(plyr)
+require(dplyr)
 require(tidyverse)
 require(segmented)
 require(formattable)
@@ -9,11 +31,14 @@ require(reshape)
 require(viridis)
 require(wbs)
 require(ecp)
-
+require(reshape)
+}
+  
 ######################################################################
 ###### create picewise linear functions depending on cumulative events
 ######################################################################
 # Create Piecewise Linear models of cumulative sum of your data to identify breakpoints.
+# This section creates two functions to analyse breaking points
 {
 #'
 #' @param dates dd/mm/yyyy format, the dates on which events occurred
@@ -131,7 +156,7 @@ piecewise_linear <- function(dates, #The dates that events occurred
 }
 }
 
-# A function to visulaise output of piecewise_linear().
+# A function to visualize output of piecewise_linear().
 {
 #' @param pwlf The dictionary output from piecewise_linear().
 #' @param breakpoints_to_plot A vector of numbers of breakpoints to plot.
@@ -189,13 +214,28 @@ piecewise_linear_plotter <- function(pwlf, #this is the output from my_piecewise
 }
 }
 
-#### Use data for Boko HAram and analyse directionalit
+#### Read Boko Haram data and analyse directionality
+{
 BH <- read.csv("BH_data.csv")
 BH <- BH[BH$dateNum >= 40179, ]
 BHResponsable <- BH$CLASSIFIED %in% c("Boko Haram", "Battle")
 FiltDF <- BH[BHResponsable, ] ### events by Boko Haram
-FiltDF <- BH[!BHResponsable, ] ### events againts BH
+FiltDF <- BH[!BHResponsable, ] ### events against BH
 DF1 <- FiltDF
+}
+
+#### run piecewise for all events and plot them
+{
+M <- piecewise_linear(DF1$date, 
+                      max_pieces = 5)
+piecewise_linear_plotter(M)
+
+### dates for 1:5 break points
+M$break.points
+}
+
+#### run for 20 pieces
+{
 for (pieces in 1:20){
   max_pieces = pieces
   M <- try(piecewise_linear(DF1$date, max_pieces = max_pieces), silent = TRUE)
@@ -218,13 +258,13 @@ for (pieces in 1:20){
     rateMatrix$Q.9 <- apply(rateMatrix, 1, quantile9)
     rateMatrix$MeanR <- apply(rateMatrix, 1, mean)
     rateMatrix$date <- M$aggregated.data$dates
-    #FileName <- paste("BHDirectionality/Results_BH_Directionality_pieces_", max_pieces ,".RData", sep = "")
     FileName <- paste("BHDirectionality/Results_BHMNJTF_Directionality_pieces_", max_pieces ,".RData", sep = "")
     save(rateMatrix, file = FileName)
     cat(pieces, "\n")
   }
 }
 write.csv(rateMatrix, file = "BHDirectionality.csv", row.names = FALSE)
+}
 
 #### SPECIALISATION
 {
@@ -365,17 +405,8 @@ for (pieces in 1:20){
 }
 }
 
-#### create figure of specialisation By BH
+#### create figure of specialization By BH
 {
-  load(paste("BySuicideBombs_", 20,".RData", sep = ""))
-  SB <- rateMatrix
-  load(paste("ByRemoteAttack_", 14 ,".RData", sep = ""))
-  RA <- rateMatrix
-  load(paste("ByAttack_", 15 ,".RData", sep = ""))
-  Att <- rateMatrix
-  load(paste("ByArmedClash_", 18 ,".RData", sep = ""))
-  AC <- rateMatrix
-  
   colSB <- rev(plasma(20, alpha = 0.5))[12]
   colRA <- rev(plasma(20, alpha = 0.5))[9]
   colAtt <- rev(plasma(20, alpha = 0.5))[5]
@@ -464,5 +495,3 @@ for (pieces in 1:20){
   }
   dev.off()
 }
-
-
