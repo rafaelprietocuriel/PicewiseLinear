@@ -168,9 +168,9 @@ piecewise_linear <- function(dates, #The dates that events occurred
 #' @export
 
 piecewise_linear_plotter <- function(pwlf, #this is the output from my_piecewise_linear()
-                                     breakpoints_to_plot=NULL, #Which numbers of breakpoints to plot, vector
-                                     legend.position=c(.85,.25), #where to position legend, 'none' for no legend
-                                     breakpoint_lines=TRUE){ #Whether to plot the lines of breakpoints or not
+                                     breakpoints_to_plot = 2, #Which numbers of breakpoints to plot, vector
+                                     legend.position = c(.85,.25), #where to position legend, 'none' for no legend
+                                     breakpoint_lines = TRUE){ #Whether to plot the lines of breakpoints or not
   
   colours <- c('#332288', '#44AA99', '#117733', '#CC6677', '#AA4499') #Chosen to be distinct non-primary colours
   
